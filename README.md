@@ -1,27 +1,37 @@
-# MeanMax
+Create Ng Project: ng new project-name
+Run App(localhost:4200): ng serve
+Create Component: ng g c compName
+To use [(ngModel)] import FormsModule from '@angular/forms' and mention in imports array in app.module.ts
+ng add @angular/material
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.6.
 
-## Development server
+Add Express:
+npm i --save express
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
 
-## Code scaffolding
+Body Parser:
+npm i --save body-parser
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+> Install MongoDb in local 
+> create clusture from the mongoDb (need to have a account)
+> add dataBase user, which generates a key (save it)
+> add ip address
+> Create clusture
 
-## Build
+Mongoose is a 3rd party lib to connect to mongoDB, so install it in your code
+> npm i --save mongoose
+> import mongoose
+> declare a schema (bluePrint he says)
+> export mongoose
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+Import Mongoose in express file and connect to nomgoDB
+> url = open mongo > connect > connect to application > copy the auto generated url
+> mongoose.connect("url")
+> post data from angular application
+> to view the posted data:-
+> mongoDB > clusture > collections TADA!!!
 
-## Running unit tests
+Install robo 3T for a better GUI
+> install robo 3t
+> create db 
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
