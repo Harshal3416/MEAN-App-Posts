@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: "https://mean-app-hb.herokuapp.com/api",
+  apiUrl: "https://localhost:3001",
 };
