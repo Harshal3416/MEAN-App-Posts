@@ -1,39 +1,46 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs'
-import { Post } from '../posts/post.model'
 import { HttpClient } from '@angular/common/http'
 import { map } from 'rxjs/operators'
 import { Router } from '@angular/router';
+import { environment} from '../../environments/environment'
 
+import { Post } from '../posts/post.model'
+
+const BACKEND_URL = `${environment.apiUrl}/posts`
 @Injectable({
   providedIn: 'root'
 })
+
 export class PostServiceService {
 
-  constructor(private http: HttpClient, private router: Router){
-
-  }
+  constructor(private http: HttpClient, private router: Router){ }
 
   private posts: Post[] = [];
-  private postUpdated = new Subject<Post[]>()
+  private postUpdated = new Subject<{posts: Post[], postCount: number}>()
 
-  getPost(){
-    // return [...this.posts];
+
+  getPost(postPerPage: number, currentPage: number){
+
+    const queryParams = `?pageSize=${postPerPage}&page=${currentPage}`
+
     this.http
-    .get<{message: string, posts: any}>('http://localhost:3000/api/posts')
+    .get<{message: string, posts: any, maxPosts : number}>(BACKEND_URL+queryParams)
     .pipe(map((postData)=>{
-      return postData.posts.map(post =>{
+      return { posts: postData.posts.map(post =>{
         return {
           title: post.title,
           content: post.content,
           id: post._id,
-          imagePath: post.imagePath
+          imagePath: post.imagePath,
+          creator: post.creator
         };
-      })
+      }), maxPosts: postData.maxPosts }
     }))
     .subscribe( postData=>{
-      this.posts = postData;
-      this.postUpdated.next([...this.posts])
+      console.log(postData)
+      this.posts = postData.posts;
+      this.postUpdated.next({posts: [...this.posts], postCount: postData.maxPosts})
     });
   }
 
@@ -42,8 +49,8 @@ export class PostServiceService {
   }
 
   getPostbyId(id: string){
-    return this.http.get<{_id: string, title: string, content: string, imagePath: string}>(
-      `http://localhost:3000/api/posts/${id}`)
+    return this.http.get<{_id: string, title: string, content: string, imagePath: string, creator: string}>(
+      `${BACKEND_URL}/${id}`)
   }
 
   addPost(title: string, content: string, image: File) {
@@ -52,19 +59,9 @@ export class PostServiceService {
     postData.append("content", content)
     postData.append("image", image, title)
 
-    console.log("POSTDATA", postData)
-
     this.http
-      .post<{ message: string, post: Post }>("http://localhost:3000/api/posts", postData)
+      .post<{ message: string, post: Post }>(BACKEND_URL, postData)
       .subscribe(responseData => {
-        const post : Post = {
-          id: responseData.post.id,
-          title: title,
-          content: content,
-          imagePath: responseData.post.imagePath
-        }
-        this.posts.push(post);
-        this.postUpdated.next([...this.posts]);
         this.router.navigate(["/"])
       });
   }
@@ -82,36 +79,22 @@ export class PostServiceService {
         id: id,
         title: title,
         content: content,
-        imagePath: image
+        imagePath: image,
+        creator: null
       };
     }
-    console.log("POSTDATA", postData)
+
     this.http
-      .put("http://localhost:3000/api/posts/" + id, postData)
+      .put(`${BACKEND_URL}/${id}`, postData)
       .subscribe(response => {
-        const updatedPosts = [...this.posts];
-        const oldPostIndex = updatedPosts.findIndex(p => p.id === id);
-        const post: Post = {
-          id: id,
-          title: title,
-          content: content,
-          imagePath: ""
-        };
-        updatedPosts[oldPostIndex] = post;
-        this.posts = updatedPosts;
-        this.postUpdated.next([...this.posts]);
         this.router.navigate(["/"]);
       });
   }
 
 
    deletePost(postId: string) {
-    this.http.delete(`http://localhost:3000/api/posts/${postId}`)
-      .subscribe(() => {
-        const updatedPosts = this.posts.filter(post => post.id !== postId);
-        this.posts = updatedPosts;
-        this.postUpdated.next([...this.posts]);
-      });
+   return this.http.delete(`${BACKEND_URL}/${postId}`)
+
   }
 
 }

@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { AuthService } from '../auth/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -7,9 +9,26 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HeaderComponent implements OnInit {
 
-  constructor() { }
+  userIsAuthenticated = false
+  private authListnerSubs: Subscription
+  constructor(private authService : AuthService) { }
 
   ngOnInit() {
+    this.userIsAuthenticated = this.authService.getIsAuth()
+    this.authListnerSubs = this.authService
+    .getAuthStatusListner()
+    .subscribe(isAuthenticated => {
+      this.userIsAuthenticated = isAuthenticated
+    });
   }
+
+  ngOnDestroy(){
+
+  }
+
+  onlogout(){
+    this.authService.logout()
+  }
+
 
 }

@@ -1,21 +1,24 @@
-import { Component, EventEmitter, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Output, OnInit, OnDestroy } from '@angular/core';
 import {Post} from '../post.model'
 import { FormGroup, FormControl, Validators } from '@angular/forms'
 import { PostServiceService } from '../../services/post-service.service'
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import { mimeType } from './mime-type-validator';
+import { Subscription } from 'rxjs';
+import { AuthService } from 'src/app/auth/auth.service';
 
 @Component({
   selector: 'app-post-create',
   templateUrl: './post-create.component.html',
   styleUrls: ['./post-create.component.css']
 })
-export class PostCreateComponent implements OnInit {
+export class PostCreateComponent implements OnInit, OnDestroy {
 
   enteredContent=""
   enteredTitle=""
   private mode = 'create'
   private postId: string
+  private authStatusSub:  Subscription
   post : Post
   form: FormGroup
 
@@ -25,11 +28,16 @@ export class PostCreateComponent implements OnInit {
 
 constructor(
   public postSer: PostServiceService,
-  public route: ActivatedRoute
+  public route: ActivatedRoute,
+  public authService : AuthService
   ){}
 
 ngOnInit(){
-
+  this.authStatusSub = this.authService.getAuthStatusListner().subscribe(
+    authstatus => {
+      this.showLoader = false
+    }
+  )
   this.form = new FormGroup({
     title: new FormControl(null, {validators: [Validators.required, Validators.minLength(3)]}),
 
@@ -49,7 +57,8 @@ ngOnInit(){
           id: postData._id,
           title: postData.title,
           content: postData.content,
-          imagePath: postData.imagePath
+          imagePath: postData.imagePath,
+          creator: postData.creator
         }
 
         this.form.setValue({
@@ -104,5 +113,9 @@ onFilePicked(event: Event){
 
    this.form.reset()
 
+  }
+
+  ngOnDestroy(){
+    this.authStatusSub.unsubscribe()
   }
 }
